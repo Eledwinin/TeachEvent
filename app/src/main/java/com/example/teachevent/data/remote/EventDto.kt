@@ -1,9 +1,11 @@
+//creado por Edwin Mauricio Morales Rodriguez
 package com.example.techevent.data.remote
 
 import androidx.room.Query
 import kotlinx.serialization.Serializable
 
 @Serializable
+
 data class EventDto(
     val id: String,
     val title: String,

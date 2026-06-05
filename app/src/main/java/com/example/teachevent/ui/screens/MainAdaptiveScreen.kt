@@ -1,3 +1,4 @@
+//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.ui.screens
 
 import androidx.compose.foundation.layout.*

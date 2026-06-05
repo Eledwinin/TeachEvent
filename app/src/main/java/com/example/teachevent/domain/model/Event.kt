@@ -1,3 +1,4 @@
+//creado por Edwin Mauricio Morales Rodriguez
 package com.example.techevent.domain.model
 
 import com.example.teachevent.domain.model.AgendaItem

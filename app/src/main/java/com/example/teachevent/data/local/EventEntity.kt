@@ -1,3 +1,4 @@
+//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.data.local
 
 import androidx.room.Entity

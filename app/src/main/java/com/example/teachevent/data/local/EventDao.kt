@@ -1,3 +1,4 @@
+//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.data.local
 
 import androidx.room.*
@@ -9,7 +10,7 @@ interface EventDao {
     @Query("SELECT * FROM events_table")
     fun getFavoriteEvents(): Flow<List<EventEntity>>
 
-    
+
     @Query("SELECT * FROM events_table")
     suspend fun getFavoriteEventsDirect(): List<EventEntity>
 
