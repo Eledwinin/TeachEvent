@@ -30,7 +30,7 @@ android {
     }
 
     compileOptions {
-        // CORREGIDO: Actualizado a Java 17 porque Room y KSP no funcionan con Java 11
+
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }

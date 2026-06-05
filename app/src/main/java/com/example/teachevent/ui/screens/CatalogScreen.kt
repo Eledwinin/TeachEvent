@@ -1,4 +1,3 @@
-//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.ui.screens
 
 import androidx.compose.foundation.background
@@ -39,8 +38,8 @@ fun CatalogScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+
     var showOfflineMessage by remember(uiState) {
         mutableStateOf(uiState is UIState.Success && uiState.isOfflineMode)
     }
@@ -57,29 +56,39 @@ fun CatalogScreen(
                     Text(
                         text = titleText,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1A237E)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 actions = {
                     if (selectedTab == 0) {
                         IconButton(onClick = onRetry) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = "Recargar", tint = Color.Gray)
+
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Recargar",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                // la barra de arribAa cambia de color según el modo
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         bottomBar = {
-            NavigationBar(containerColor = Color.White) {
+            //La barra inferior cambia de color automáticamente
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
                     icon = { Icon(Icons.Default.DateRange, contentDescription = null) },
                     label = { Text("Eventos") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF6200EE),
-                        selectedTextColor = Color(0xFF6200EE)
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
                     )
                 )
                 NavigationBarItem(
@@ -93,8 +102,8 @@ fun CatalogScreen(
                     },
                     label = { Text("Favoritos") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF6200EE),
-                        selectedTextColor = Color(0xFF6200EE)
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
                     )
                 )
                 NavigationBarItem(
@@ -103,18 +112,27 @@ fun CatalogScreen(
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("Configuración") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF6200EE),
-                        selectedTextColor = Color(0xFF6200EE)
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
         },
         modifier = modifier
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(innerPadding)
+        ) {
             when (uiState) {
                 is UIState.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color(0xFF6200EE))
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
                 is UIState.Success -> {
                     when (selectedTab) {
@@ -124,6 +142,7 @@ fun CatalogScreen(
                                     text = "Próximos Eventos",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                                 )
 
@@ -148,6 +167,7 @@ fun CatalogScreen(
                                     text = "Mis Eventos Favoritos",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                                 )
 
@@ -159,7 +179,7 @@ fun CatalogScreen(
                                         Text(
                                             text = "Aún no tienes eventos favoritos guardados.",
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.Gray
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 } else {
@@ -189,13 +209,14 @@ fun CatalogScreen(
                                     text = "Ajustes de la Aplicación",
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground,
                                     modifier = Modifier.padding(vertical = 12.dp)
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                                 ) {
                                     Row(
@@ -209,20 +230,21 @@ fun CatalogScreen(
                                             Text(
                                                 text = "Tema Oscuro",
                                                 style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.SemiBold
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.onSurface
                                             )
                                             Text(
                                                 text = "Habilitar modo noche en la app",
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = Color.Gray
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
                                         Switch(
                                             checked = isDarkMode,
                                             onCheckedChange = onThemeChange,
                                             colors = SwitchDefaults.colors(
-                                                checkedThumbColor = Color(0xFF6200EE),
-                                                checkedTrackColor = Color(0xFFE8EAF6)
+                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                                                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
                                             )
                                         )
                                     }
@@ -230,6 +252,7 @@ fun CatalogScreen(
                             }
                         }
                     }
+
                     if (showOfflineMessage) {
                         Card(
                             modifier = Modifier
@@ -244,7 +267,7 @@ fun CatalogScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text("🌐 Modo sin conexión. Mostrando datos guardados.", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                                Text(" Modo sin conexión. Mostrando datos guardados.", color = Color.White, style = MaterialTheme.typography.bodyMedium)
                                 TextButton(onClick = { showOfflineMessage = false }) {
                                     Text("DESCARTAR", color = Color(0xFF818CF8), fontWeight = FontWeight.Bold)
                                 }
@@ -279,7 +302,8 @@ fun EventCardItem(
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        // el fondo de la tarjeta cambia según el tema
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -296,18 +320,18 @@ fun EventCardItem(
                 contentScale = ContentScale.Crop,
                 loading = {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color(0xFFF1F5F9)),
+                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp), color = Color(0xFF6200EE))
+                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.primary)
                     }
                 },
                 error = {
                     Box(
-                        modifier = Modifier.fillMaxSize().background(Color(0xFFFFEBEE)),
+                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = Color(0xFFC62828))
+                        Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
                     }
                 }
             )
@@ -321,20 +345,21 @@ fun EventCardItem(
                     text = event.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2
                 )
 
                 Text(
                     text = event.date,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp)
                 )
 
                 Text(
                     text = event.location,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 val statusText = if (event.hasAvailableSlots) "Cupos Disponibles" else "Agotado"
@@ -360,7 +385,7 @@ fun EventCardItem(
                 Icon(
                     imageVector = if (event.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = null,
-                    tint = if (event.isFavorite) Color.Red else Color.LightGray
+                    tint = if (event.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant // DINÁMICO
                 )
             }
         }
