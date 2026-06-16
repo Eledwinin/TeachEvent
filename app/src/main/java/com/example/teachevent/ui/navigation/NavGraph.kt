@@ -33,9 +33,7 @@ fun NavGraph(
                 LoginScreen(
                     viewModel = loginViewModel,
                     onLoginSuccess = {
-                        navController.navigate(Routes.Catalog.route) {
-                            popUpTo(Routes.Login.route) { inclusive = true }
-                        }
+                        navController.navigate(Routes.Catalog.route)
                     }
                 )
             }

@@ -11,16 +11,19 @@ import com.example.teachevent.ui.theme.TeachEventTheme
 import com.example.teachevent.ui.viewmodel.LoginViewModel
 
 class MainActivity : ComponentActivity() {
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val sessionDataStore = SessionDataStore(applicationContext)
+
+
+        val sessionDataStore = SessionDataStore(this)
         val loginViewModel = LoginViewModel(sessionDataStore)
 
         setContent {
             TeachEventTheme {
                 val windowSizeClass = calculateWindowSizeClass(this)
+
                 NavGraph(
                     sessionDataStore = sessionDataStore,
                     loginViewModel = loginViewModel,

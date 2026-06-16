@@ -20,25 +20,24 @@ class LoginViewModel(private val sessionDataStore: SessionDataStore) : ViewModel
     val uiState: StateFlow<LoginUiState> = _uiState
 
     fun login(username: String, password: String) {
-        if (username.isEmpty() || password.isEmpty()) {
+        if (username.isBlank() || password.isBlank()) {
             _uiState.value = LoginUiState.Error("Los campos no pueden estar vacíos")
             return
         }
 
-        viewModelScope.launch {
-            _uiState.value = LoginUiState.Loading
+        _uiState.value = LoginUiState.Loading
 
-            if (username == "admin" && password == "1234") {
+        if (username == "admin" && password == "1234") {
+            viewModelScope.launch {
                 sessionDataStore.saveSession(true)
                 _uiState.value = LoginUiState.Success
-            } else {
-                _uiState.value = LoginUiState.Error("Usuario o contraseña incorrectos")
             }
+        } else {
+            _uiState.value = LoginUiState.Error("Usuario o contraseña incorrectos")
         }
     }
 
-    fun resetState(){
+    fun resetState() {
         _uiState.value = LoginUiState.Idle
-
     }
 }
