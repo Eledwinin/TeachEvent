@@ -1,15 +1,12 @@
-//creado por Edwin Mauricio Morales Rodriguez
-package com.example.techevent.data.repository
+package com.example.teachevent.data.repository
 
 import com.example.teachevent.data.local.EventEntity
+import com.example.teachevent.data.remote.AgendaItemDto
+import com.example.teachevent.data.remote.EventDto
+import com.example.teachevent.data.remote.SpeakerDto
 import com.example.teachevent.domain.model.AgendaItem
-import com.example.techevent.data.remote.EventDto
-import com.example.techevent.data.remote.SpeakerDto
-import com.example.techevent.data.remote.AgendaItemDto
-import com.example.techevent.domain.model.Event
-import com.example.techevent.domain.model.Speaker
-
-
+import com.example.teachevent.domain.model.Event
+import com.example.teachevent.domain.model.Speaker
 
 fun EventDto.toDomain(isFavorite: Boolean = false): Event {
     return Event(
@@ -37,7 +34,6 @@ fun AgendaItemDto.toDomain() = AgendaItem(
     title = this.title
 )
 
-
 fun EventEntity.toDomain(): Event {
     return Event(
         id = this.id,
@@ -52,7 +48,6 @@ fun EventEntity.toDomain(): Event {
         agenda = emptyList()
     )
 }
-
 
 fun Event.toEntity(): EventEntity {
     return EventEntity(

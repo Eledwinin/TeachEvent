@@ -11,9 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.teachevent.MainActivity
-
 import com.example.teachevent.ui.viewmodel.UIState
-import com.example.techevent.domain.model.Event
+import com.example.teachevent.domain.model.Event
+
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun MainAdaptiveScreen(
@@ -25,53 +25,67 @@ fun MainAdaptiveScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val activity = LocalContext.current as MainActivity
-    val windowSizeClass = calculateWindowSizeClass(activity)
-
+    val activity = LocalContext.current as? MainActivity
+    
     var selectedEventIdForTablet by remember { mutableStateOf<String?>(null) }
 
-    when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Expanded, WindowWidthSizeClass.Medium -> {
-            Row(modifier = modifier.fillMaxSize()) {
-                Box(modifier = Modifier.weight(0.4f).fillMaxHeight()) {
-                    CatalogScreen(
-                        uiState = uiState,
-                        isDarkMode = isDarkMode,
-                        onThemeChange = onThemeChange,
-                        onEventClick = { id ->
-                            selectedEventIdForTablet = id
-                        },
-                        onFavoriteToggle = onFavoriteToggle,
-                        onRetry = onRetry
-                    )
-                }
+    if (activity != null) {
+        val windowSizeClass = calculateWindowSizeClass(activity)
+        
+        when (windowSizeClass.widthSizeClass) {
+            WindowWidthSizeClass.Expanded, WindowWidthSizeClass.Medium -> {
+                Row(modifier = modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.weight(0.4f).fillMaxHeight()) {
+                        CatalogScreen(
+                            uiState = uiState,
+                            isDarkMode = isDarkMode,
+                            onThemeChange = onThemeChange,
+                            onEventClick = { id ->
+                                selectedEventIdForTablet = id
+                            },
+                            onFavoriteToggle = onFavoriteToggle,
+                            onRetry = onRetry
+                        )
+                    }
 
-                VerticalDivider(thickness = 1.dp, modifier = Modifier.fillMaxHeight())
+                    VerticalDivider(thickness = 1.dp, modifier = Modifier.fillMaxHeight())
 
-                Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
-                    val currentEvent = (uiState as? UIState.Success)?.events?.find {
-                        it.id == selectedEventIdForTablet
-                    } ?: (uiState as? UIState.Success)?.events?.firstOrNull()
+                    Box(modifier = Modifier.weight(0.6f).fillMaxHeight()) {
+                        val currentEvent = (uiState as? UIState.Success)?.events?.find {
+                            it.id == selectedEventIdForTablet
+                        } ?: (uiState as? UIState.Success)?.events?.firstOrNull()
 
-                    DetailScreen(
-                        event = currentEvent,
-                        onBackClick = {
-                            selectedEventIdForTablet = null
-                        }
-                    )
+                        DetailScreen(
+                            event = currentEvent,
+                            onBackClick = {
+                                selectedEventIdForTablet = null
+                            }
+                        )
+                    }
                 }
             }
+            else -> {
+                CatalogScreen(
+                    uiState = uiState,
+                    isDarkMode = isDarkMode,
+                    onThemeChange = onThemeChange,
+                    onEventClick = onEventClick,
+                    onFavoriteToggle = onFavoriteToggle,
+                    onRetry = onRetry,
+                    modifier = modifier
+                )
+            }
         }
-        else -> {
-            CatalogScreen(
-                uiState = uiState,
-                isDarkMode = isDarkMode,
-                onThemeChange = onThemeChange,
-                onEventClick = onEventClick,
-                onFavoriteToggle = onFavoriteToggle,
-                onRetry = onRetry,
-                modifier = modifier
-            )
-        }
+    } else {
+        // Fallback or loading if activity is not available (rare in normal use)
+        CatalogScreen(
+            uiState = uiState,
+            isDarkMode = isDarkMode,
+            onThemeChange = onThemeChange,
+            onEventClick = onEventClick,
+            onFavoriteToggle = onFavoriteToggle,
+            onRetry = onRetry,
+            modifier = modifier
+        )
     }
 }

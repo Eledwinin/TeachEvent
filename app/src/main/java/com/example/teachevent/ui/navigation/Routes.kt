@@ -1,12 +1,10 @@
 //creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.ui.navigation
 
-import kotlinx.serialization.Serializable
-
-interface Routes {
-    @Serializable
-    object Catalog : Routes
-
-    @Serializable
-    data class Detail(val eventId: String) : Routes
+sealed class Routes(val route: String) {
+    object Login : Routes("login")
+    object Catalog : Routes("catalog")
+    object Detail : Routes("detail/{eventId}") {
+        fun createRoute(id: String) = "detail/$id"
+    }
 }

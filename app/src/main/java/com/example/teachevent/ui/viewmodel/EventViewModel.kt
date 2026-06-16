@@ -3,7 +3,7 @@ package com.example.teachevent.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teachevent.domain.repository.EventRepository
-import com.example.techevent.domain.model.Event
+import com.example.teachevent.domain.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,14 +19,11 @@ class EventViewModel(
     private val _uiState = MutableStateFlow<UIState>(UIState.Loading)
     val uiState: StateFlow<UIState> = _uiState.asStateFlow()
 
-    // Flujos temporales para retener los eventos crudos y el estado offline
     private val _rawEvents = MutableStateFlow<List<Event>>(emptyList())
     private val _isOffline = MutableStateFlow(false)
 
     init {
-        // 1. Iniciar la observación reactiva de favoritos en Room
         observeUiState()
-        // 2. Disparar la petición de datos
         loadEvents()
     }
 

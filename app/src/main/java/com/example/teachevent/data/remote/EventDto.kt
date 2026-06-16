@@ -1,11 +1,8 @@
-//creado por Edwin Mauricio Morales Rodriguez
-package com.example.techevent.data.remote
+package com.example.teachevent.data.remote
 
-import androidx.room.Query
 import kotlinx.serialization.Serializable
 
 @Serializable
-
 data class EventDto(
     val id: String,
     val title: String,
@@ -19,14 +16,11 @@ data class EventDto(
 )
 
 @Serializable
-
 data class SpeakerDto(
     val name: String,
     val role: String,
     val company: String
 )
-
-
 
 @Serializable
 data class AgendaItemDto(

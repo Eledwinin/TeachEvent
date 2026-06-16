@@ -1,7 +1,6 @@
-//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.domain.repository
 
-import com.example.techevent.domain.model.Event
+import com.example.teachevent.domain.model.Event
 import kotlinx.coroutines.flow.Flow
 
 interface EventRepository {

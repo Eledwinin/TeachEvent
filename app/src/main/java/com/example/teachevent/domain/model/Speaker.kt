@@ -1,5 +1,4 @@
-//creado por Edwin Mauricio Morales Rodriguez
-package com.example.techevent.domain.model
+package com.example.teachevent.domain.model
 
 data class Speaker(
     val name: String,

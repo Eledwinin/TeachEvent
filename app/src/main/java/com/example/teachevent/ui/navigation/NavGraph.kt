@@ -1,64 +1,78 @@
-//creado por Edwin Mauricio Morales Rodriguez
 package com.example.teachevent.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.runtime.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
-import com.example.teachevent.ui.screens.DetailScreen
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.teachevent.data.local.SessionDataStore
+import com.example.teachevent.ui.screens.LoginScreen
 import com.example.teachevent.ui.screens.MainAdaptiveScreen
+import com.example.teachevent.ui.screens.DetailScreen
+import com.example.teachevent.ui.viewmodel.LoginViewModel
 import com.example.teachevent.ui.viewmodel.EventViewModel
-import com.example.teachevent.ui.viewmodel.UIState
 
 @Composable
-fun TechEventNavGraph(
-    navController: NavHostController,
-    viewModel: EventViewModel,
-    isDarkMode: Boolean,
-    onThemeChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+fun NavGraph(
+    sessionDataStore: SessionDataStore,
+    loginViewModel: LoginViewModel,
+    windowSizeClass: WindowWidthSizeClass
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val navController = rememberNavController()
+    val isLoggedIn by sessionDataStore.isLoggedIn.collectAsState(initial = null)
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.Catalog,
-        modifier = modifier
-    ) {
+    if (isLoggedIn != null) {
+        val startDestination = if (isLoggedIn == true) Routes.Catalog.route else Routes.Login.route
 
-        composable<Routes.Catalog> {
-            MainAdaptiveScreen(
-                uiState = uiState,
-                isDarkMode = isDarkMode,
-                onThemeChange = onThemeChange,
-                onEventClick = { id ->
-                    navController.navigate(Routes.Detail(eventId = id))
-                },
-                onFavoriteToggle = { event ->
-                    viewModel.onFavoriteClick(event)
-                },
-                onRetry = {
-                    viewModel.loadEvents()
-                }
-            )
-        }
+        NavHost(navController = navController, startDestination = startDestination) {
 
-        composable<Routes.Detail> { backStackEntry ->
-            val detailRoute = backStackEntry.toRoute<Routes.Detail>()
-            val selectedEvent = (uiState as? UIState.Success)?.events?.find {
-                it.id == detailRoute.eventId
+            composable(Routes.Login.route) {
+                LoginScreen(
+                    viewModel = loginViewModel,
+                    onLoginSuccess = {
+                        navController.navigate(Routes.Catalog.route) {
+                            popUpTo(Routes.Login.route) { inclusive = true }
+                        }
+                    }
+                )
             }
 
-            DetailScreen(
-                event = selectedEvent,
-                onBackClick = {
-                    navController.popBackStack()
+            composable(Routes.Catalog.route) {
+                val eventViewModel: EventViewModel = viewModel()
+                val eventUiState by eventViewModel.uiState.collectAsState()
+
+                MainAdaptiveScreen(
+                    uiState = eventUiState,
+                    isDarkMode = false,
+                    onThemeChange = { },
+                    onFavoriteToggle = { },
+                    onRetry = { },
+                    onEventClick = { eventId ->
+                        navController.navigate(Routes.Detail.createRoute(eventId))
+                    }
+                )
+            }
+
+            composable(
+                route = Routes.Detail.route,
+                arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val eventId = backStackEntry.arguments?.getString("eventId") ?: ""
+                val eventViewModel: EventViewModel = viewModel()
+                val eventUiState by eventViewModel.uiState.collectAsState()
+
+                val currentEvent = (eventUiState as? com.example.teachevent.ui.viewmodel.UIState.Success)?.events?.find {
+                    it.id == eventId
                 }
-            )
+
+                DetailScreen(
+                    event = currentEvent,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

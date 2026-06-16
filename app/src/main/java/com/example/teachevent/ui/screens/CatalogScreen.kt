@@ -6,12 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -23,9 +18,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-
+import com.example.teachevent.domain.model.Event
 import com.example.teachevent.ui.viewmodel.UIState
-import com.example.techevent.domain.model.Event
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,21 +34,12 @@ fun CatalogScreen(
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
-    var showOfflineMessage by remember(uiState) {
-        mutableStateOf(uiState is UIState.Success && uiState.isOfflineMode)
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    val titleText = when (selectedTab) {
-                        0 -> "TechEvent"
-                        1 -> "Favoritos"
-                        else -> "Configuración"
-                    }
                     Text(
-                        text = titleText,
+                        text = if (selectedTab == 0) "UMAevent" else if (selectedTab == 1) "Favoritos" else "Ajustes",
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -62,228 +47,61 @@ fun CatalogScreen(
                 actions = {
                     if (selectedTab == 0) {
                         IconButton(onClick = onRetry) {
-
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Recargar",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Icon(Icons.Default.Refresh, contentDescription = "Recargar")
                         }
                     }
-                },
-                // la barra de arribAa cambia de color según el modo
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
         },
         bottomBar = {
-            //La barra inferior cambia de color automáticamente
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+            NavigationBar {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
                     icon = { Icon(Icons.Default.DateRange, contentDescription = null) },
-                    label = { Text("Eventos") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    )
+                    label = { Text("Eventos") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == 1) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = null
-                        )
-                    },
-                    label = { Text("Favoritos") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    )
+                    icon = { Icon(if (selectedTab == 1) Icons.Default.Favorite else Icons.Default.FavoriteBorder, contentDescription = null) },
+                    label = { Text("Favoritos") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Configuración") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary
-                    )
+                    label = { Text("Ajustes") }
                 )
             }
         },
         modifier = modifier
     ) { innerPadding ->
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-                .padding(innerPadding)
-        ) {
+        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
             when (uiState) {
-                is UIState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                is UIState.Loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                is UIState.Error -> Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
+                    Button(onClick = onRetry) { Text("Reintentar") }
                 }
                 is UIState.Success -> {
-                    when (selectedTab) {
-                        0 -> {
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                Text(
-                                    text = "Próximos Eventos",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                )
-
-                                LazyColumn(
-                                    contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 80.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(uiState.events) { event ->
-                                        EventCardItem(
-                                            event = event,
-                                            onClick = { onEventClick(event.id) },
-                                            onFavoriteClick = { onFavoriteToggle(event) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        1 -> {
-                            val favoriteEvents = uiState.events.filter { it.isFavorite }
-                            Column(modifier = Modifier.fillMaxSize()) {
-                                Text(
-                                    text = "Mis Eventos Favoritos",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                                )
-
-                                if (favoriteEvents.isEmpty()) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize().padding(bottom = 50.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Aún no tienes eventos favoritos guardados.",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                } else {
-                                    LazyColumn(
-                                        contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 80.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        items(favoriteEvents) { event ->
-                                            EventCardItem(
-                                                event = event,
-                                                onClick = { onEventClick(event.id) },
-                                                onFavoriteClick = { onFavoriteToggle(event) }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        2 -> {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(24.dp),
-                                verticalArrangement = Arrangement.Top
-                            ) {
-                                Text(
-                                    text = "Ajustes de la Aplicación",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(vertical = 12.dp)
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column {
-                                            Text(
-                                                text = "Tema Oscuro",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Text(
-                                                text = "Habilitar modo noche en la app",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        Switch(
-                                            checked = isDarkMode,
-                                            onCheckedChange = onThemeChange,
-                                            colors = SwitchDefaults.colors(
-                                                checkedThumbColor = MaterialTheme.colorScheme.primary,
-                                                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (showOfflineMessage) {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .align(Alignment.BottomCenter),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E293B)),
-                            shape = RoundedCornerShape(8.dp)
+                    val eventsToShow = if (selectedTab == 1) uiState.events.filter { it.isFavorite } else uiState.events
+                    
+                    if (eventsToShow.isEmpty()) {
+                        Text("No hay eventos para mostrar", modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        LazyColumn(
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp).fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(" Modo sin conexión. Mostrando datos guardados.", color = Color.White, style = MaterialTheme.typography.bodyMedium)
-                                TextButton(onClick = { showOfflineMessage = false }) {
-                                    Text("DESCARTAR", color = Color(0xFF818CF8), fontWeight = FontWeight.Bold)
-                                }
+                            items(eventsToShow) { event ->
+                                EventCardItem(
+                                    event = event,
+                                    onClick = { onEventClick(event.id) },
+                                    onFavoriteClick = { onFavoriteToggle(event) }
+                                )
                             }
                         }
-                    }
-                }
-                is UIState.Error -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = onRetry) { Text("Reintentar") }
                     }
                 }
             }
@@ -293,99 +111,29 @@ fun CatalogScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventCardItem(
-    event: Event,
-    onClick: () -> Unit,
-    onFavoriteClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
+fun EventCardItem(event: Event, onClick: () -> Unit, onFavoriteClick: () -> Unit) {
+    ElevatedCard(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        // el fondo de la tarjeta cambia según el tema
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             SubcomposeAsyncImage(
                 model = event.imageUrl,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(90.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-                loading = {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.primary)
-                    }
-                },
-                error = {
-                    Box(
-                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.errorContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(imageVector = Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error)
-                    }
-                }
+                modifier = Modifier.size(80.dp).clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
-            ) {
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2
-                )
-
-                Text(
-                    text = event.date,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-
-                Text(
-                    text = event.location,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                val statusText = if (event.hasAvailableSlots) "Cupos Disponibles" else "Agotado"
-                val statusBg = if (event.hasAvailableSlots) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
-                val statusColor = if (event.hasAvailableSlots) Color(0xFF2E7D32) else Color(0xFFC62828)
-
-                Surface(
-                    modifier = Modifier.padding(top = 8.dp),
-                    color = statusBg,
-                    shape = RoundedCornerShape(4.dp)
-                ) {
-                    Text(
-                        text = statusText,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = statusColor,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                    )
-                }
+            Column(modifier = Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(event.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(event.date, style = MaterialTheme.typography.bodySmall)
+                Text(event.location, style = MaterialTheme.typography.bodySmall)
             }
-
             IconButton(onClick = onFavoriteClick) {
                 Icon(
                     imageVector = if (event.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = null,
-                    tint = if (event.isFavorite) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant // DINÁMICO
+                    tint = if (event.isFavorite) Color.Red else Color.Gray
                 )
             }
         }

@@ -1,7 +1,4 @@
-//creado por Edwin Mauricio Morales Rodriguez
-package com.example.techevent.domain.model
-
-import com.example.teachevent.domain.model.AgendaItem
+package com.example.teachevent.domain.model
 
 data class Event(
     val id: String,
@@ -10,7 +7,7 @@ data class Event(
     val date: String,
     val location: String,
     val imageUrl: String,
-    val hasAvailableSlots: Boolean, // Cambiado a Boolean para que coincida con la UI y los DTOs
+    val hasAvailableSlots: Boolean,
     val speakers: List<Speaker> = emptyList(),
     val agenda: List<AgendaItem> = emptyList(),
     val isFavorite: Boolean = false
